@@ -1,0 +1,101 @@
+// Copyright SJTU 咸鱼队
+// Development version, please compile before production
+
+body {
+    background-color: #FFA726;
+    // background-image: url(../images/background.png);
+    background-image: url(https://lh6.ggpht.com/jgKnU_eWDfdSzJVFNUOcIOfL6zRzvlISsctKiVCo5PzdOQY-4z_mkaJd7kpBWCi_pf4Y=w300);
+    background-size: 100px;
+    background-attachment: fixed;
+}
+
+.app-container {
+    background-color: rgba(255,255,255,0.97);
+    padding: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 100vh;
+    padding-bottom: 150px;
+    position: relative;
+    box-shadow: rgba(0,0,0,0.3) 0 0 50px;
+}
+
+.container {
+    max-width: 800px;
+}
+
+.bubble {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    .username {
+        display: block;
+        font-size: 12px;
+        color: #E65100;
+    }
+    .inner {
+        background-color: #E65100;
+        color: white;
+        display: inline-block;
+        padding: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        border-radius: 20px;
+        transition: all ease 0.3s;
+        cursor: default;
+        border-top-left-radius: 0px;
+        &:hover {
+            box-shadow: rgba(0,0,0,0.2) 3px 3px 7px;
+            transition: all ease 0.3s;
+        }
+    }
+    img {
+        width:300px;
+        border-radius: 5px;
+    }
+    span.meta {
+        opacity: 0.5;
+        font-size: 12px;
+        display: block;
+    }
+}
+
+.bubble-right {
+    text-align: right;
+    .inner {
+        background-color: transparent;
+        color: #E65100;
+        padding: 0;
+        &:hover {
+            box-shadow: rgba(0,0,0,0) 3px 3px 7px;
+            transition: all ease 0.3s;
+        }
+    }
+}
+
+#send-form {
+    text-align: right;
+    background-color: #EF6C00;
+    position: fixed;
+    bottom: 0;
+    left:0;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#msg-textbox {
+    margin-bottom: 10px;
+    opacity: 0.7;
+    border: none;
+    transition: all ease 0.3s;
+    &:focus {
+        opacity: 1;
+        transition: all ease 0.3s;
+    }
+}
+
+#img-upload-form {
+    display: none;
+}

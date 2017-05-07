@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>🖼2😀</title>
+        <link href="bootstrap/bootstrap-4.0.0-alpha.6-dist/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+        <!--<link href="less/main.less" type="text/less" rel="stylesheet" />-->
+        <link href="css/main.css?v=0001" type="text/css" rel="stylesheet" />
+        <link href="fontawesome/font-awesome-4.7.0/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
+        <script src="js/jquery-3.2.1.min.js"></script>
+        <script src="js/tether.min.js"></script>
+        <!--<script src="js/less-2.7.2.min.js"></script>-->
+        <script src="bootstrap/bootstrap-4.0.0-alpha.6-dist/js/bootstrap.min.js"></script>
+        <script src="js/sdk.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <div class="modal fade" id="username-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fa fa-user" aria-hidden="true"></i> 第一次来到聊天室？请先选择一个昵称</h5>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        <p><input type="text" id="username-textbox" class="form-control" placeholder="最长十个字符"></p>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" id="start-chat-button" class="btn btn-primary">开始聊天</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="app-container">
+                <div id="msg-container">
+                    <div class="bubble bubble-right">
+                    </div>
+                </div>
+            </div>
+            <div id="send-form">
+                <div class="container">
+                    <textarea id="msg-textbox" class="form-control" placeholder="支持MarkDown"></textarea>
+                    <form action="http://uploadimg.sh1a.qingstor.com" id="img-upload-form">
+                        <input type="file" name="file" id="img-file" />
+                    </form>
+                    <button class="btn btn-warning" id="upload-image-button"><i class="fa fa-upload" aria-hidden="true"></i> 发送图片</button>
+                    <button class="btn btn-warning" id="change-name-button"><i class="fa fa-sign-out" aria-hidden="true"></i> 更换账号</button>
+                    <button class="btn btn-danger" id="send-button"><i class="fa fa-paper-plane" aria-hidden="true"></i> 发送</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+    // Create new Pic2Emoji API object
+    var app = new Pic2Emoji("http://139.198.188.158:8080");
+    var files = null;
+    var last_reload_time = new Date(0);
+    var first_load_finished = false;
+    function reloadMessages(show_noti){
+        app.getMessages(last_reload_time.toJSON(), function(data){
+            $.each(data, function(key, val){
+                // Create bubbles
+                var bubble = $("<div class='bubble'></div>");
+                bubble.append("<span class='username'>" + val.username + "</span>");
+                var bubble_inner = $("<div class='inner'></div>");
+                if(val.type == "text"){
+                    bubble_inner.append(val.text);
+                } else {
+                    bubble_inner.append("<img src='" + val.photo + "' /><br>(" + val.emoji + ")");
+                }
+                bubble_inner.append("<span class='meta'>" + val.date + "</span>");
+                bubble.append(bubble_inner);
+                if(val.username == app.username){
+                    bubble.addClass("bubble-right");
+                } else {
+                    if (show_noti){
+                        if(val.type == "text") sendNotification(val.text);
+                        else sendNotification(val.emoji);
+                    } else {
+                        $("body").scrollTop($("body").height() + 100);
+                    }
+                }
+                $("#msg-container").append(bubble);
+                var d = new Date(val.date);
+                last_reload_time = new Date(d.getTime() + 1500);
+            });
+            scrollToBottom();
+            first_load_finished = true;
+            setTimeout(function(){reloadMessages(true)}, 4000);
+        });
+    }
+    $(function(){
+        // Request notification permission if not yet granted
+        if (Notification.permission !== "granted")
+            Notification.requestPermission();
+        app.init();
+        $("#start-chat-button").click(function(){
+            var username = $("#username-textbox").val();
+            if(username.length > 10 || username.length <= 0){
+                alert("请输入一个有效的用户名");
+            } else {
+                app.setUsername(username);
+                $("#username-modal").modal('hide');
+            }
+        });
+        $("#upload-image-button").click(function(){
+            $("#img-file").click();
+        });
+        $("#img-file").change(function(event){
+            files = event.target.files;
+            $("#img-upload-form").submit();
+        });
+        $("#change-name-button").click(function(){
+            app.setCookie("pic2emoji_uname", "", -1);
+            window.location.reload();
+        });
+        $("#send-button").click(function(){
+            app.sendMessage($("#msg-textbox").val(), "text");
+            $("#msg-textbox").val("");
+        });
+        $("#img-upload-form").submit(function(event){
+            event.stopPropagation(); // Stop stuff happening
+            event.preventDefault();
+            var data = new FormData();
+            var unique_id = makeid();
+            data.append("key", unique_id);
+            $("#send-button").attr("disabled", true);
+            $("#upload-image-button").attr("disabled", true);
+            $("#send-button").html("<i class='fa fa-spinner fa-spin'></i> 正在发送");
+            $.each(files, function(key, value)
+            {
+                data.append(key, value);
+            });
+            $.ajax({
+                url: 'http://uploadimg.sh1a.qingstor.com',
+                type: 'POST',
+                data: data,
+                cache: false,
+                dataType: 'json',
+                processData: false, // Don't process the files
+                contentType: false,
+                success:function(data){
+                    console.log(data);
+                },
+                error:function(err){
+                    if(err.status == 201){
+                        app.sendMessage("http://uploadimg.sh1a.qingstor.com/" + unique_id, "photo");
+                    }
+                }
+            });
+        });
+    });
+
+    function makeid()
+    {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for( var i=0; i < 64; i++ )
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    }
+
+    function scrollToBottom(){
+        if(Math.abs($("body").height() - $("body").scrollTop() - $(window).height()) < 500){
+            $("body").scrollTop($("body").height() + 100);
+        }
+    }
+
+    function sendNotification(message) {
+        if (!Notification) { 
+            return;
+        }
+        // If permission is still not granted, try again
+        if (Notification.permission !== "granted"){
+            Notification.requestPermission();
+        } else {
+            var notification = new Notification('您有新消息', {
+                body: message,
+            });
+
+            // Don't do anything after sending the notification
+            notification.onclick = function () {
+                window.location = "#";
+                return "#";
+            };
+        }
+    }
+</script>

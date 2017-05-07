@@ -1,0 +1,7 @@
+flask
+Flask-SQLAlchemy
+requests
+python-dateutil
+flask-cors
+gevent
+pymysql

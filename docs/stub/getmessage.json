@@ -1,0 +1,15 @@
+[
+	{
+		"date": "2012-04-23T18:25:43.511Z",
+		"username": "Alice",
+		"type": "text",
+		"text": "hello world!"
+	},
+	{
+		"date": "2012-04-23T18:25:48.511Z",
+		"username": "Bob",
+		"type": "photo",
+		"photo": "http://www.wikihow.com/images/d/d2/Be-Happy-Without-Remembering-Anything-About-the-Past-Step-19.jpg",
+		"emoji": "😞"
+	}
+]

@@ -1,0 +1,10 @@
+
+*.pyc
+
+backend/data/emoji_id.csv
+
+backend/data/emoji.csv
+
+.venv
+chatserver.db
+.idea
